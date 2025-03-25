@@ -1,13 +1,22 @@
 package com.example.Login_spring_security.config;
 
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.password.NoOpPasswordEncoder;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.stereotype.Controller;
 
@@ -42,12 +51,41 @@ public class SecurityConfig {
                 .csrf(Customizer ->Customizer.disable())
                 .authorizeHttpRequests(request-> request.anyRequest().authenticated())
                 .httpBasic(Customizer.withDefaults())
-                .formLogin(Customizer.withDefaults())
+                .formLogin(Customizer.withDefaults());
                 //we can make session stateless , the side effect is whenever we try to login , it will ask username and password if you enter corect then again show same form with blank field because their no things to manage session,
-                .sessionManagement(session-> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+            //    .sessionManagement(session-> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
 
                 return http.build();
 
+    }
+
+    //you can create user and password using this below method also , but this is also hard code we have anather way to create use
+
+//    @Bean
+//    public UserDetailsService userDetailsService()
+//    {
+//        UserDetails user1= User
+//                .withDefaultPasswordEncoder()
+//                .username("om")
+//                .password("123")
+//                .roles("ADMIN")
+//                .build();
+//        return new InMemoryUserDetailsManager(user1);
+//    }
+
+    //New Methos which store data in postgresql
+
+    @Autowired
+    private UserDetailsService userDetailsService;
+
+    @Bean
+    public AuthenticationProvider authenticationProvider()
+    {
+        DaoAuthenticationProvider provider=new DaoAuthenticationProvider();
+        provider.setPasswordEncoder(NoOpPasswordEncoder.getInstance());
+        provider.setUserDetailsService(userDetailsService);
+
+        return provider;
     }
 }

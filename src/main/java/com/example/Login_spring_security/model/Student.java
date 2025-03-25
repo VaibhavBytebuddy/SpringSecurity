@@ -1,4 +1,4 @@
-package com.example.Login_spring_security;
+package com.example.Login_spring_security.model;
 
 public class Student {
     private int id;
@@ -43,4 +43,5 @@ public class Student {
                 ", marks=" + marks +
                 '}';
     }
+
 }
